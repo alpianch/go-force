@@ -170,7 +170,7 @@ type ChildRelationship struct {
 	RelationshipName    string `json:"relationshipName"`
 }
 
-func (forceApi *ForceApi) getApiResources() (*[]byte, error) {
+func (forceApi *ForceApi) getApiResources() ([]byte, error) {
 	uri := fmt.Sprintf(resourcesUri, forceApi.apiVersion)
 
 	return forceApi.Get(uri, nil, &forceApi.apiResources)
@@ -219,7 +219,7 @@ func (forceApi *ForceApi) GetAccessToken() string {
 	return forceApi.oauth.AccessToken
 }
 
-func (forceApi *ForceApi) RefreshToken() (*[]byte, error) {
+func (forceApi *ForceApi) RefreshToken() ([]byte, error) {
 	res := &RefreshTokenResponse{}
 	payload := map[string]string{
 		"grant_type":    "refresh_token",
