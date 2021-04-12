@@ -170,7 +170,7 @@ type ChildRelationship struct {
 	RelationshipName    string `json:"relationshipName"`
 }
 
-func (forceApi *ForceApi) getApiResources() error {
+func (forceApi *ForceApi) getApiResources() (*[]byte, error) {
 	uri := fmt.Sprintf(resourcesUri, forceApi.apiVersion)
 
 	return forceApi.Get(uri, nil, &forceApi.apiResources)
@@ -180,7 +180,7 @@ func (forceApi *ForceApi) getApiSObjects() error {
 	uri := forceApi.apiResources[sObjectsKey]
 
 	list := &SObjectApiResponse{}
-	err := forceApi.Get(uri, nil, list)
+	_, err := forceApi.Get(uri, nil, list)
 	if err != nil {
 		return err
 	}
@@ -200,7 +200,7 @@ func (forceApi *ForceApi) getApiSObjectDescriptions() error {
 		uri := metaData.URLs[sObjectDescribeKey]
 
 		desc := &SObjectDescription{}
-		err := forceApi.Get(uri, nil, desc)
+		_, err := forceApi.Get(uri, nil, desc)
 		if err != nil {
 			return err
 		}
@@ -219,7 +219,7 @@ func (forceApi *ForceApi) GetAccessToken() string {
 	return forceApi.oauth.AccessToken
 }
 
-func (forceApi *ForceApi) RefreshToken() error {
+func (forceApi *ForceApi) RefreshToken() (*[]byte, error) {
 	res := &RefreshTokenResponse{}
 	payload := map[string]string{
 		"grant_type":    "refresh_token",
@@ -228,11 +228,11 @@ func (forceApi *ForceApi) RefreshToken() error {
 		"client_secret": forceApi.oauth.clientSecret,
 	}
 
-	err := forceApi.Post("/services/oauth2/token", nil, payload, res)
+	resp, err := forceApi.Post("/services/oauth2/token", nil, payload, res)
 	if err != nil {
-		return err
+		return resp, err
 	}
 
 	forceApi.oauth.AccessToken = res.AccessToken
-	return nil
+	return resp, nil
 }

@@ -44,7 +44,7 @@ func Create(version, clientId, clientSecret, userName, password, securityToken,
 	}
 
 	// Init Api Resources
-	err = forceApi.getApiResources()
+	_, err = forceApi.getApiResources()
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func CreateWithAccessToken(version, clientId, accessToken, instanceUrl string) (
 	}
 
 	// Init Api Resources
-	err := forceApi.getApiResources()
+	_, err := forceApi.getApiResources()
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func CreateWithRefreshToken(version, clientId, accessToken, instanceUrl string) 
 	}
 
 	// obtain access token
-	if err := forceApi.RefreshToken(); err != nil {
+	if _, err := forceApi.RefreshToken(); err != nil {
 		return nil, err
 	}
 
@@ -115,7 +115,7 @@ func CreateWithRefreshToken(version, clientId, accessToken, instanceUrl string) 
 	}
 
 	// Init Api Resources
-	err := forceApi.getApiResources()
+	_, err := forceApi.getApiResources()
 	if err != nil {
 		return nil, err
 	}
