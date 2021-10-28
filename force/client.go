@@ -20,34 +20,34 @@ const (
 
 // Get issues a GET to the specified path with the given params and put the
 // umarshalled (json) result in the third parameter
-func (forceApi *ForceApi) Get(path string, params url.Values, out interface{}) ([]byte, error) {
+func (forceApi *ForceApi) Get(path string, params url.Values, out interface{}) (*[]byte, error) {
 	return forceApi.request("GET", path, params, nil, out)
 }
 
 // Post issues a POST to the specified path with the given params and payload
 // and put the unmarshalled (json) result in the third parameter
-func (forceApi *ForceApi) Post(path string, params url.Values, payload, out interface{}) ([]byte, error) {
+func (forceApi *ForceApi) Post(path string, params url.Values, payload, out interface{}) (*[]byte, error) {
 	return forceApi.request("POST", path, params, payload, out)
 }
 
 // Put issues a PUT to the specified path with the given params and payload
 // and put the unmarshalled (json) result in the third parameter
-func (forceApi *ForceApi) Put(path string, params url.Values, payload, out interface{}) ([]byte, error) {
+func (forceApi *ForceApi) Put(path string, params url.Values, payload, out interface{}) (*[]byte, error) {
 	return forceApi.request("PUT", path, params, payload, out)
 }
 
 // Patch issues a PATCH to the specified path with the given params and payload
 // and put the unmarshalled (json) result in the third parameter
-func (forceApi *ForceApi) Patch(path string, params url.Values, payload, out interface{}) ([]byte, error) {
+func (forceApi *ForceApi) Patch(path string, params url.Values, payload, out interface{}) (*[]byte, error) {
 	return forceApi.request("PATCH", path, params, payload, out)
 }
 
 // Delete issues a DELETE to the specified path with the given payload
-func (forceApi *ForceApi) Delete(path string, params url.Values) ([]byte, error) {
+func (forceApi *ForceApi) Delete(path string, params url.Values) (*[]byte, error) {
 	return forceApi.request("DELETE", path, params, nil, nil)
 }
 
-func (forceApi *ForceApi) request(method, path string, params url.Values, payload, out interface{}) ([]byte, error) {
+func (forceApi *ForceApi) request(method, path string, params url.Values, payload, out interface{}) (*[]byte, error) {
 	if err := forceApi.oauth.Validate(); err != nil {
 		return nil, fmt.Errorf("Error creating %v request: %v", method, err)
 	}
@@ -101,7 +101,7 @@ func (forceApi *ForceApi) request(method, path string, params url.Values, payloa
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return respBytes, fmt.Errorf("Error reading response bytes: %v", err)
+		return &respBytes, fmt.Errorf("Error reading response bytes: %v", err)
 	}
 	forceApi.traceResponseBody(respBytes)
 
@@ -110,7 +110,7 @@ func (forceApi *ForceApi) request(method, path string, params url.Values, payloa
 	if out != nil {
 		objectUnmarshalErr = forcejson.Unmarshal(respBytes, out)
 		if objectUnmarshalErr == nil {
-			return respBytes, nil
+			return &respBytes, nil
 		}
 	}
 
@@ -123,19 +123,19 @@ func (forceApi *ForceApi) request(method, path string, params url.Values, payloa
 				// Reauthenticate then attempt query again
 				oauthErr := forceApi.oauth.Authenticate()
 				if oauthErr != nil {
-					return respBytes, oauthErr
+					return &respBytes, oauthErr
 				}
 
 				return forceApi.request(method, path, params, payload, out)
 			}
 
-			return respBytes, apiErrors
+			return &respBytes, apiErrors
 		}
 	}
 
 	if objectUnmarshalErr != nil {
 		// Not a force.com api error. Just an unmarshalling error.
-		return respBytes, fmt.Errorf("Unable to unmarshal response to object: %v", objectUnmarshalErr)
+		return &respBytes, fmt.Errorf("Unable to unmarshal response to object: %v", objectUnmarshalErr)
 	}
 
 	// Sometimes no response is expected. For example delete and update. We still have to make sure an error wasn't returned.

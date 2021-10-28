@@ -3,6 +3,7 @@ package force
 import (
 	"bytes"
 	"fmt"
+	"github.com/nimajalali/go-force/sobjects"
 	"net/url"
 	"strings"
 )
@@ -109,7 +110,7 @@ func (forceApi *ForceApi) DeleteSObject(id string, in SObject) (err error) {
 	return
 }
 
-func (forceApi *ForceApi) GetSObjectByExternalId(id string, fields []string, out SObject) (err error) {
+func (forceApi *ForceApi) GetSObjectByExternalId(id string, fields []string, out SObject) (resp *sobjects.BaseSObject, err error) {
 	uri := fmt.Sprintf("%v/%v/%v", forceApi.apiSObjects[out.ApiName()].URLs[sObjectKey],
 		out.ExternalIdApiName(), id)
 
@@ -118,7 +119,8 @@ func (forceApi *ForceApi) GetSObjectByExternalId(id string, fields []string, out
 		params.Add("fields", strings.Join(fields, ","))
 	}
 
-	_, err = forceApi.Get(uri, params, out.(interface{}))
+	resp = &sobjects.BaseSObject{}
+	_, err = forceApi.Get(uri, params, resp)
 
 	return
 }
